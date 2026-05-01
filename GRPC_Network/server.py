@@ -104,6 +104,16 @@ class GPUServicer(pb2_grpc.GPUServiceServicer):
             return pb2.FreeResponse(success=True)
         return pb2.FreeResponse(success=False)
 
+    def FetchTensor(self, request, context):
+        from rpc_utils import _SERVER_REGISTRY, tensor_to_proto
+        if request.remote_id in _SERVER_REGISTRY:
+            t = _SERVER_REGISTRY[request.remote_id]
+            log.debug(f"FetchTensor: {request.remote_id} shape={tuple(t.shape)}")
+            # Serialize the actual data by acting as a client
+            return tensor_to_proto(t, pb2.TensorData, is_server=False)
+        log.error(f"FetchTensor failed: remote_id {request.remote_id} not found")
+        return pb2.TensorData()
+
 
 # ── Server bootstrap ──────────────────────────────────────────────────────────
 

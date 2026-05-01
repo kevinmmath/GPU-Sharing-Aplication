@@ -42,8 +42,12 @@ register()
 
 __all__ = [
     "enable", "disable", "intercept", "connect", "disconnect",
-    "GPUShareMode", "DEVICE_NAME",
+    "GPUShareMode", "DEVICE_NAME", "sync"
 ]
+
+def sync(t):
+    """Fetch actual tensor data from the server (Phase 2.5)."""
+    return remote_client.sync(t)
 
 
 def enable(host: str = "", port: int = 50051) -> None:

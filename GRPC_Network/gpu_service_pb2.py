@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gpu_service.proto\x12\ngpusharing\" \n\x0b\x46reeRequest\x12\x11\n\tremote_id\x18\x01 \x01(\t\"\x1f\n\x0c\x46reeResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"f\n\nTensorData\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\r\n\x05\x64type\x18\x03 \x01(\t\x12\x15\n\rrequires_grad\x18\x04 \x01(\x08\x12\x11\n\tremote_id\x18\x05 \x01(\t\"W\n\tOpRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\x10\n\x08\x61rgs_pkl\x18\x02 \x01(\x0c\x12\'\n\x07tensors\x18\x03 \x03(\x0b\x32\x16.gpusharing.TensorData\"V\n\x08OpResult\x12\x12\n\nresult_pkl\x18\x01 \x01(\x0c\x12\'\n\x07tensors\x18\x02 \x03(\x0b\x32\x16.gpusharing.TensorData\x12\r\n\x05\x65rror\x18\x03 \x01(\t2\x87\x01\n\nGPUService\x12\x38\n\tExecuteOp\x12\x15.gpusharing.OpRequest\x1a\x14.gpusharing.OpResult\x12?\n\nFreeTensor\x12\x17.gpusharing.FreeRequest\x1a\x18.gpusharing.FreeResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gpu_service.proto\x12\ngpusharing\" \n\x0b\x46reeRequest\x12\x11\n\tremote_id\x18\x01 \x01(\t\"\x1f\n\x0c\x46reeResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"!\n\x0c\x46\x65tchRequest\x12\x11\n\tremote_id\x18\x01 \x01(\t\"f\n\nTensorData\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\r\n\x05\x64type\x18\x03 \x01(\t\x12\x15\n\rrequires_grad\x18\x04 \x01(\x08\x12\x11\n\tremote_id\x18\x05 \x01(\t\"W\n\tOpRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\x10\n\x08\x61rgs_pkl\x18\x02 \x01(\x0c\x12\'\n\x07tensors\x18\x03 \x03(\x0b\x32\x16.gpusharing.TensorData\"V\n\x08OpResult\x12\x12\n\nresult_pkl\x18\x01 \x01(\x0c\x12\'\n\x07tensors\x18\x02 \x03(\x0b\x32\x16.gpusharing.TensorData\x12\r\n\x05\x65rror\x18\x03 \x01(\t2\xc8\x01\n\nGPUService\x12\x38\n\tExecuteOp\x12\x15.gpusharing.OpRequest\x1a\x14.gpusharing.OpResult\x12?\n\nFreeTensor\x12\x17.gpusharing.FreeRequest\x1a\x18.gpusharing.FreeResponse\x12?\n\x0b\x46\x65tchTensor\x12\x18.gpusharing.FetchRequest\x1a\x16.gpusharing.TensorDatab\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,12 +35,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_FREEREQUEST']._serialized_end=65
   _globals['_FREERESPONSE']._serialized_start=67
   _globals['_FREERESPONSE']._serialized_end=98
-  _globals['_TENSORDATA']._serialized_start=100
-  _globals['_TENSORDATA']._serialized_end=202
-  _globals['_OPREQUEST']._serialized_start=204
-  _globals['_OPREQUEST']._serialized_end=291
-  _globals['_OPRESULT']._serialized_start=293
-  _globals['_OPRESULT']._serialized_end=379
-  _globals['_GPUSERVICE']._serialized_start=382
-  _globals['_GPUSERVICE']._serialized_end=517
+  _globals['_FETCHREQUEST']._serialized_start=100
+  _globals['_FETCHREQUEST']._serialized_end=133
+  _globals['_TENSORDATA']._serialized_start=135
+  _globals['_TENSORDATA']._serialized_end=237
+  _globals['_OPREQUEST']._serialized_start=239
+  _globals['_OPREQUEST']._serialized_end=326
+  _globals['_OPRESULT']._serialized_start=328
+  _globals['_OPRESULT']._serialized_end=414
+  _globals['_GPUSERVICE']._serialized_start=417
+  _globals['_GPUSERVICE']._serialized_end=617
 # @@protoc_insertion_point(module_scope)

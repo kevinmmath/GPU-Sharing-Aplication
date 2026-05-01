@@ -45,6 +45,11 @@ class GPUServiceStub(object):
                 request_serializer=gpu__service__pb2.FreeRequest.SerializeToString,
                 response_deserializer=gpu__service__pb2.FreeResponse.FromString,
                 _registered_method=True)
+        self.FetchTensor = channel.unary_unary(
+                '/gpusharing.GPUService/FetchTensor',
+                request_serializer=gpu__service__pb2.FetchRequest.SerializeToString,
+                response_deserializer=gpu__service__pb2.TensorData.FromString,
+                _registered_method=True)
 
 
 class GPUServiceServicer(object):
@@ -63,6 +68,13 @@ class GPUServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def FetchTensor(self, request, context):
+        """Fetch actual tensor data from the server to the client
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GPUServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -75,6 +87,11 @@ def add_GPUServiceServicer_to_server(servicer, server):
                     servicer.FreeTensor,
                     request_deserializer=gpu__service__pb2.FreeRequest.FromString,
                     response_serializer=gpu__service__pb2.FreeResponse.SerializeToString,
+            ),
+            'FetchTensor': grpc.unary_unary_rpc_method_handler(
+                    servicer.FetchTensor,
+                    request_deserializer=gpu__service__pb2.FetchRequest.FromString,
+                    response_serializer=gpu__service__pb2.TensorData.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -132,6 +149,33 @@ class GPUService(object):
             '/gpusharing.GPUService/FreeTensor',
             gpu__service__pb2.FreeRequest.SerializeToString,
             gpu__service__pb2.FreeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def FetchTensor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/gpusharing.GPUService/FetchTensor',
+            gpu__service__pb2.FetchRequest.SerializeToString,
+            gpu__service__pb2.TensorData.FromString,
             options,
             channel_credentials,
             insecure,

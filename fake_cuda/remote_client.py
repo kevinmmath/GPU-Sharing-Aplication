@@ -142,3 +142,25 @@ def free_tensor(remote_id: str, cdata: int = None):
         _stub.FreeTensor.future(pb2.FreeRequest(remote_id=remote_id))
     except Exception as e:
         log.warning(f"[remote_client] Failed to free tensor {remote_id}: {e}")
+
+def sync(t: torch.Tensor):
+    """Fetch the actual tensor data from the server."""
+    if _stub is None:
+        return t
+        
+    remote_id = getattr(t, "remote_id", "")
+    if not remote_id:
+        from rpc_utils import _CLIENT_REGISTRY
+        remote_id = _CLIENT_REGISTRY.get(t._cdata, "")
+        
+    if not remote_id:
+        return t
+        
+    log.debug(f"[remote_client] Fetching tensor {remote_id[:8]}... from server")
+    response = _stub.FetchTensor(pb2.FetchRequest(remote_id=remote_id))
+    
+    if len(response.raw_data) > 0:
+        import ctypes
+        ctypes.memmove(t.data_ptr(), response.raw_data, len(response.raw_data))
+        
+    return t

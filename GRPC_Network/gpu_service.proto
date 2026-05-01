@@ -6,6 +6,9 @@ package gpusharing;
 service GPUService {
   rpc ExecuteOp (OpRequest) returns (OpResult);
   rpc FreeTensor (FreeRequest) returns (FreeResponse);
+  
+  // Fetch actual tensor data from the server to the client
+  rpc FetchTensor (FetchRequest) returns (TensorData);
 }
 
 message FreeRequest {
@@ -14,6 +17,10 @@ message FreeRequest {
 
 message FreeResponse {
   bool success = 1;
+}
+
+message FetchRequest {
+  string remote_id = 1;
 }
 
 // Wire format for a single tensor.

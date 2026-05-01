@@ -54,6 +54,9 @@ fake_cuda.enable(host=args.host, port=args.port)
 with torch.no_grad():
     remote_output = model(x)
     remote_loss   = loss_fn(remote_output, target)
+    
+    # Fetch actual data from server before disabling connection
+    fake_cuda.sync(remote_output)
 
 fake_cuda.disable()
 
