@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package gpusharing;
+
+// Execute one ATen operator per RPC call.
+service GPUService {
+  rpc ExecuteOp (OpRequest) returns (OpResult);
+}
+
+// Wire format for a single tensor.
+message TensorData {
+  bytes          raw_data     = 1;  // contiguous bytes (little-endian native)
+  repeated int32 shape        = 2;  // e.g. [32, 784]
+  string         dtype        = 3;  // "float32", "int64", "bool", …
+  bool           requires_grad = 4;
+}
+
+// One ATen op invocation: client → server.
+message OpRequest {
+  // str(func) from __torch_dispatch__, e.g. "aten.mm.default"
+  string              op_name  = 1;
+  // pickle.dumps((args_with_refs, kwargs_with_refs))
+  // Every torch.Tensor has been replaced by a _TensorRef(idx) sentinel.
+  bytes               args_pkl = 2;
+  // The tensors extracted from args/kwargs, in index order.
+  repeated TensorData tensors  = 3;
+}
+
+// Op result: server → client.
+message OpResult {
+  // pickle.dumps(result_with_refs)
+  // Every torch.Tensor in the result replaced by _TensorRef(idx).
+  bytes               result_pkl = 1;
+  // Result tensors in index order.
+  repeated TensorData tensors    = 2;
+  // Non-empty on server-side error.
+  string              error      = 3;
+}

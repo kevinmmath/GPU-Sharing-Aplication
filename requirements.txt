@@ -1,0 +1,5 @@
+torch>=2.0.0
+grpcio>=1.60.0        # Phase 2: gRPC transport
+grpcio-tools>=1.60.0  # Phase 2: protoc compiler (regenerate pb2 files)
+numpy>=1.24.0         # tensor serialisation
+pytest>=7.0.0
