@@ -22,6 +22,7 @@ import logging
 import threading
 
 import grpc
+import torch
 
 # ── Make GRPC_Network importable ──────────────────────────────────────────────
 _HERE     = os.path.dirname(os.path.abspath(__file__))
