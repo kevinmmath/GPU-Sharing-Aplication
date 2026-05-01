@@ -57,6 +57,7 @@ with torch.no_grad():
     
     # Fetch actual data from server before disabling connection
     fake_cuda.sync(remote_output)
+    fake_cuda.sync(remote_loss)
 
 fake_cuda.disable()
 
