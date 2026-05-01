@@ -21,6 +21,12 @@ import ctypes
 import pickle
 import numpy as np
 import torch
+import uuid
+
+_SERVER_REGISTRY = {}
+_CLIENT_REGISTRY = {}
+
+
 
 # ── dtype helpers ──────────────────────────────────────────────────────────────
 
@@ -90,13 +96,36 @@ def _restore_tensors(obj, tensors):
 
 # ── Tensor → Proto (dispatch-safe: ctypes only) ──────────────────────────────
 
-def tensor_to_proto(t: torch.Tensor, pb2_TensorData):
+def tensor_to_proto(t: torch.Tensor, pb2_TensorData, is_server=False):
     """
     Serialise tensor using ONLY metadata accessors + ctypes.
     Safe inside __torch_dispatch__.
     """
     shape     = tuple(t.shape)
     dtype_str = _dtype_str(t)
+    
+    remote_id = getattr(t, "remote_id", "")
+    if not remote_id and t._cdata in _CLIENT_REGISTRY:
+        remote_id = _CLIENT_REGISTRY[t._cdata]
+        
+    if is_server:
+        # Server always registers the tensor and assigns an ID, skips data sending
+        remote_id = str(uuid.uuid4())
+        _SERVER_REGISTRY[remote_id] = t
+        return pb2_TensorData(
+            raw_data=b"", shape=list(shape),
+            dtype=dtype_str, requires_grad=t.requires_grad,
+            remote_id=remote_id
+        )
+        
+    if remote_id:
+        # Client tensor already has an ID, skip data sending
+        return pb2_TensorData(
+            raw_data=b"", shape=list(shape),
+            dtype=dtype_str, requires_grad=t.requires_grad,
+            remote_id=remote_id
+        )
+
     elem_sz   = _ELEM_SIZE[dtype_str]
     strides   = tuple(t.stride())
 
@@ -132,6 +161,7 @@ def tensor_to_proto(t: torch.Tensor, pb2_TensorData):
     return pb2_TensorData(
         raw_data=raw, shape=list(shape),
         dtype=dtype_str, requires_grad=t.requires_grad,
+        remote_id=""
     )
 
 
@@ -155,7 +185,7 @@ def proto_to_tensor_dispatch_safe(td, template: torch.Tensor) -> torch.Tensor:
     return t
 
 
-def proto_to_tensor_normal(td, device: str = "cpu") -> torch.Tensor:
+def proto_to_tensor_normal(td, device: str = "cpu", is_server=False) -> torch.Tensor:
     """
     Create tensor outside dispatch context (server-side or worker thread).
     Uses standard torch.from_numpy.
@@ -163,11 +193,31 @@ def proto_to_tensor_normal(td, device: str = "cpu") -> torch.Tensor:
     will handle it automatically, and setting it manually causes conflicts
     with differentiable-view ops like aten.t.
     """
-    np_dt = _TORCH_TO_NP[td.dtype]
-    arr = np.frombuffer(td.raw_data, dtype=np_dt).reshape(list(td.shape)).copy()
-    t = torch.from_numpy(arr)
+    if is_server and td.remote_id:
+        if td.remote_id in _SERVER_REGISTRY:
+            return _SERVER_REGISTRY[td.remote_id]
+        else:
+            raise RuntimeError(f"Server cannot find remote_id {td.remote_id}")
+
+    shape = list(td.shape)
+    dtype = _STR_TO_TORCH[td.dtype]
+    
+    if len(td.raw_data) == 0:
+        t = torch.empty(shape, dtype=dtype)
+    else:
+        np_dt = _TORCH_TO_NP[td.dtype]
+        arr = np.frombuffer(td.raw_data, dtype=np_dt).reshape(shape).copy()
+        t = torch.from_numpy(arr)
+        
     if device != "cpu":
         t = t.to(device)
+        
+    if not is_server and td.remote_id:
+        setattr(t, "remote_id", td.remote_id)
+        _CLIENT_REGISTRY[t._cdata] = td.remote_id
+        # We cannot use weakref.finalize on 't' because PyTorch Python wrappers
+        # are short-lived and die immediately after being unwrapped to C++.
+            
     return t
 
 
@@ -177,13 +227,13 @@ def pack_call(op_name, args, kwargs, pb2_TensorData, pb2_OpRequest):
     """Serialise an ATen op call into an OpRequest proto."""
     combined, all_tensors = _extract_tensors((args, kwargs))
     args_pkl = pickle.dumps(combined)
-    tensor_protos = [tensor_to_proto(t, pb2_TensorData) for t in all_tensors]
+    tensor_protos = [tensor_to_proto(t, pb2_TensorData, is_server=False) for t in all_tensors]
     return pb2_OpRequest(op_name=op_name, args_pkl=args_pkl, tensors=tensor_protos)
 
 
 def unpack_call(request, device="cpu"):
     """Server-side: deserialise OpRequest → (op_name, args, kwargs)."""
-    tensors = [proto_to_tensor_normal(td, device) for td in request.tensors]
+    tensors = [proto_to_tensor_normal(td, device, is_server=True) for td in request.tensors]
     combined = pickle.loads(request.args_pkl)
     args, kwargs = _restore_tensors(combined, tensors)
     return request.op_name, args, kwargs
@@ -193,19 +243,18 @@ def pack_result(result, pb2_TensorData, pb2_OpResult):
     """Server-side: serialise op result into OpResult proto."""
     result_mod, tensors = _extract_tensors(result)
     result_pkl = pickle.dumps(result_mod)
-    tensor_protos = [tensor_to_proto(t, pb2_TensorData) for t in tensors]
+    tensor_protos = [tensor_to_proto(t, pb2_TensorData, is_server=True) for t in tensors]
     return pb2_OpResult(result_pkl=result_pkl, tensors=tensor_protos)
 
 
 def unpack_result_dispatch_safe(response, template: torch.Tensor):
     """Client-side inside __torch_dispatch__: uses dispatch-safe tensor creation."""
-    tensors = [proto_to_tensor_dispatch_safe(td, template) for td in response.tensors]
-    result_mod = pickle.loads(response.result_pkl)
-    return _restore_tensors(result_mod, tensors)
+    # NOT USED ANYMORE IN PHASE 2
+    pass
 
 
 def unpack_result_normal(response, device="cpu"):
     """Normal context: uses torch.from_numpy."""
-    tensors = [proto_to_tensor_normal(td, device) for td in response.tensors]
+    tensors = [proto_to_tensor_normal(td, device, is_server=False) for td in response.tensors]
     result_mod = pickle.loads(response.result_pkl)
     return _restore_tensors(result_mod, tensors)

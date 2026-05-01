@@ -127,3 +127,18 @@ def call_op(op_name, args, kwargs):
     if result_box[1] is not None:
         raise result_box[1]
     return result_box[0]
+
+
+def free_tensor(remote_id: str, cdata: int = None):
+    """Called by weakref finalizer when a client tensor is garbage collected."""
+    if cdata is not None:
+        from rpc_utils import _CLIENT_REGISTRY
+        _CLIENT_REGISTRY.pop(cdata, None)
+        
+    if _stub is None:
+        return
+    try:
+        # Non-blocking async call
+        _stub.FreeTensor.future(pb2.FreeRequest(remote_id=remote_id))
+    except Exception as e:
+        log.warning(f"[remote_client] Failed to free tensor {remote_id}: {e}")

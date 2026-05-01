@@ -5,14 +5,24 @@ package gpusharing;
 // Execute one ATen operator per RPC call.
 service GPUService {
   rpc ExecuteOp (OpRequest) returns (OpResult);
+  rpc FreeTensor (FreeRequest) returns (FreeResponse);
+}
+
+message FreeRequest {
+  string remote_id = 1;
+}
+
+message FreeResponse {
+  bool success = 1;
 }
 
 // Wire format for a single tensor.
 message TensorData {
-  bytes          raw_data     = 1;  // contiguous bytes (little-endian native)
+  bytes          raw_data     = 1;  // contiguous bytes (empty if remote_id is used)
   repeated int32 shape        = 2;  // e.g. [32, 784]
   string         dtype        = 3;  // "float32", "int64", "bool", …
   bool           requires_grad = 4;
+  string         remote_id    = 5;  // UUID linking to server-side registry
 }
 
 // One ATen op invocation: client → server.

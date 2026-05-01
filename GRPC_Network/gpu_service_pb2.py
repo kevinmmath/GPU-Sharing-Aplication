@@ -24,19 +24,23 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gpu_service.proto\x12\ngpusharing\"S\n\nTensorData\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\r\n\x05\x64type\x18\x03 \x01(\t\x12\x15\n\rrequires_grad\x18\x04 \x01(\x08\"W\n\tOpRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\x10\n\x08\x61rgs_pkl\x18\x02 \x01(\x0c\x12\'\n\x07tensors\x18\x03 \x03(\x0b\x32\x16.gpusharing.TensorData\"V\n\x08OpResult\x12\x12\n\nresult_pkl\x18\x01 \x01(\x0c\x12\'\n\x07tensors\x18\x02 \x03(\x0b\x32\x16.gpusharing.TensorData\x12\r\n\x05\x65rror\x18\x03 \x01(\t2F\n\nGPUService\x12\x38\n\tExecuteOp\x12\x15.gpusharing.OpRequest\x1a\x14.gpusharing.OpResultb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gpu_service.proto\x12\ngpusharing\" \n\x0b\x46reeRequest\x12\x11\n\tremote_id\x18\x01 \x01(\t\"\x1f\n\x0c\x46reeResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"f\n\nTensorData\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\r\n\x05shape\x18\x02 \x03(\x05\x12\r\n\x05\x64type\x18\x03 \x01(\t\x12\x15\n\rrequires_grad\x18\x04 \x01(\x08\x12\x11\n\tremote_id\x18\x05 \x01(\t\"W\n\tOpRequest\x12\x0f\n\x07op_name\x18\x01 \x01(\t\x12\x10\n\x08\x61rgs_pkl\x18\x02 \x01(\x0c\x12\'\n\x07tensors\x18\x03 \x03(\x0b\x32\x16.gpusharing.TensorData\"V\n\x08OpResult\x12\x12\n\nresult_pkl\x18\x01 \x01(\x0c\x12\'\n\x07tensors\x18\x02 \x03(\x0b\x32\x16.gpusharing.TensorData\x12\r\n\x05\x65rror\x18\x03 \x01(\t2\x87\x01\n\nGPUService\x12\x38\n\tExecuteOp\x12\x15.gpusharing.OpRequest\x1a\x14.gpusharing.OpResult\x12?\n\nFreeTensor\x12\x17.gpusharing.FreeRequest\x1a\x18.gpusharing.FreeResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'gpu_service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_TENSORDATA']._serialized_start=33
-  _globals['_TENSORDATA']._serialized_end=116
-  _globals['_OPREQUEST']._serialized_start=118
-  _globals['_OPREQUEST']._serialized_end=205
-  _globals['_OPRESULT']._serialized_start=207
-  _globals['_OPRESULT']._serialized_end=293
-  _globals['_GPUSERVICE']._serialized_start=295
-  _globals['_GPUSERVICE']._serialized_end=365
+  _globals['_FREEREQUEST']._serialized_start=33
+  _globals['_FREEREQUEST']._serialized_end=65
+  _globals['_FREERESPONSE']._serialized_start=67
+  _globals['_FREERESPONSE']._serialized_end=98
+  _globals['_TENSORDATA']._serialized_start=100
+  _globals['_TENSORDATA']._serialized_end=202
+  _globals['_OPREQUEST']._serialized_start=204
+  _globals['_OPREQUEST']._serialized_end=291
+  _globals['_OPRESULT']._serialized_start=293
+  _globals['_OPRESULT']._serialized_end=379
+  _globals['_GPUSERVICE']._serialized_start=382
+  _globals['_GPUSERVICE']._serialized_end=517
 # @@protoc_insertion_point(module_scope)

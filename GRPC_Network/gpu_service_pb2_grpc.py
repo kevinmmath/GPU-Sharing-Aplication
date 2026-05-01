@@ -40,6 +40,11 @@ class GPUServiceStub(object):
                 request_serializer=gpu__service__pb2.OpRequest.SerializeToString,
                 response_deserializer=gpu__service__pb2.OpResult.FromString,
                 _registered_method=True)
+        self.FreeTensor = channel.unary_unary(
+                '/gpusharing.GPUService/FreeTensor',
+                request_serializer=gpu__service__pb2.FreeRequest.SerializeToString,
+                response_deserializer=gpu__service__pb2.FreeResponse.FromString,
+                _registered_method=True)
 
 
 class GPUServiceServicer(object):
@@ -52,6 +57,12 @@ class GPUServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def FreeTensor(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GPUServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -59,6 +70,11 @@ def add_GPUServiceServicer_to_server(servicer, server):
                     servicer.ExecuteOp,
                     request_deserializer=gpu__service__pb2.OpRequest.FromString,
                     response_serializer=gpu__service__pb2.OpResult.SerializeToString,
+            ),
+            'FreeTensor': grpc.unary_unary_rpc_method_handler(
+                    servicer.FreeTensor,
+                    request_deserializer=gpu__service__pb2.FreeRequest.FromString,
+                    response_serializer=gpu__service__pb2.FreeResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -89,6 +105,33 @@ class GPUService(object):
             '/gpusharing.GPUService/ExecuteOp',
             gpu__service__pb2.OpRequest.SerializeToString,
             gpu__service__pb2.OpResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def FreeTensor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/gpusharing.GPUService/FreeTensor',
+            gpu__service__pb2.FreeRequest.SerializeToString,
+            gpu__service__pb2.FreeResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -96,6 +96,14 @@ class GPUServicer(pb2_grpc.GPUServiceServicer):
             log.error(f"ExecuteOp failed for '{request.op_name}': {err}")
             return pb2.OpResult(error=err)
 
+    def FreeTensor(self, request, context):
+        from rpc_utils import _SERVER_REGISTRY
+        if request.remote_id in _SERVER_REGISTRY:
+            del _SERVER_REGISTRY[request.remote_id]
+            log.debug(f"FreeTensor: {request.remote_id}")
+            return pb2.FreeResponse(success=True)
+        return pb2.FreeResponse(success=False)
+
 
 # ── Server bootstrap ──────────────────────────────────────────────────────────
 
